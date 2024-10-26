@@ -86,7 +86,7 @@ with tab1:
     WHERE UPPER(TRIM(temp.Genre)) = UPPER(TRIM(temp.Genre))
     AND temp.Genre="{genre}"
     ORDER BY temp.PosReviews DESC
-    LIMIT 500
+    LIMIT 50
     '''.format(genre=option)
     df1b = pd.read_sql(query1B, connection)
     df1b = df1b.drop(columns=["Genre"])
