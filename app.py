@@ -8,7 +8,7 @@ import altair as alt
 # Establish the connection
 connection = sql.connect(
     host=st.secrets["DB_HOST"],
-    port=st.secrets["PORT"],
+    # port=st.secrets["PORT"],
     user=st.secrets["DB_USER"],
     password=st.secrets["DB_PASSWORD"],
     database=st.secrets["DB_SCHEMA"]
@@ -127,7 +127,6 @@ with tab4:
     # Load the years from the database
     years = pd.read_sql("SELECT releaseYear FROM dim_year ORDER BY releaseYear", connection)
 
-
     st.write("What are the most active genres between two years?")
     options = years['releaseYear'].tolist()
     start_year, end_year = st.select_slider(
@@ -179,9 +178,8 @@ with tab4:
 with tab3:
     st.subheader("What were the most popular genres across each year?", divider="gray")
     CCol1, CCol2 = st.columns(2)
-
+    
     with CCol2:
-
         # Convert years to a list
         years_list = years['releaseYear'].tolist()
 
@@ -194,28 +192,24 @@ with tab3:
         )
 
         # Load categories from the database
-        categories = pd.read_sql("SELECT categoryName FROM dim_category ORDER BY categoryName", connection)
+        categories = pd.read_sql('''SELECT DISTINCT categoryName
+                        FROM dim_category
+                        JOIN bridge_category_group ON bridge_category_group.categorySK = dim_category.categorySK
+                        JOIN fact_steamgames ON fact_steamgames.categoryGroupKey = bridge_category_group.categoryGroupKey
+                        JOIN dim_year ON dim_year.yearSK = fact_steamgames.yearSK
+                        WHERE releaseYear="{year}"
+                        ORDER BY categoryName ASC;'''.format(year=yearOption), connection)
 
-        # Assuming df is properly initialized with relevant data
-        # df = pd.read_sql("SELECT * FROM your_data_table", connection)  # Example initialization
-
-        # Check if df is available and contains the right columns
-        if 'Year' in df.columns and 'Category' in df.columns:
-            # Define category options based on the selected year
-            category_options = df[df['Year'] == yearOption]['Category'].unique().tolist()
-
-            # Ensure there are categories available for the selected year
-            if category_options:
-                categoryOption = st.selectbox(
-                    "Select Category:",
-                    category_options,
-                    index=0,  # Ensure index is valid
-                    placeholder="Enter a category."
-                )
-            else:
-                st.warning("No categories available for the selected year.")
+        if not categories.empty:
+            categoryOption = st.selectbox(
+                "Select Category:",
+                categories['categoryName'].tolist(),
+                index=0,  # Ensure index is valid
+                placeholder="Enter a category."
+            )
         else:
-            st.error("DataFrame does not contain 'Year' or 'Category' columns.")
+            st.warning("No categories available for the selected year.")
+
         query3B = '''SELECT 
             genre.genreName AS 'Genre',
             COUNT(DISTINCT app.appSK) AS 'Number of Apps'
@@ -248,7 +242,6 @@ with tab3:
         st.dataframe(df, use_container_width=True)
 
     with CCol1:
-
         query3A = f'''SELECT 
             genre.genreName AS 'Genre',
             category.categoryName AS 'Category',
@@ -298,5 +291,6 @@ with tab3:
 
 
         st.plotly_chart(fig, use_container_width=True)
+
 
 connection.close()
