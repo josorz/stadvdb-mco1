@@ -7,10 +7,10 @@ import altair as alt
 
 # Establish the connection
 connection = sql.connect(
-    host='localhost',
-    user='root',
-    password='password',
-    database='steam_dw'
+    host=DB_HOST,
+    user=DB_USER,
+    password=DB_PASSWORD,
+    database=DB_SCHEMA
 )
 
 st.set_page_config(layout="wide")
