@@ -61,32 +61,22 @@ with tab1:
         placeholder="Select genre...",
     )
 
-    query1B = '''SELECT DISTINCT temp.Genre, temp.AppName AS 'App Name', temp.PosReviews AS 'Total Positive Reviews'
-    FROM (
-        SELECT
-            (SELECT genreName
-            FROM dim_genre
-            WHERE genreSK = gg.genreSK) AS Genre,
-            (SELECT appName
-            FROM dim_app
-            WHERE appSK = f.appSK) AS AppName,
-            f.positiveReviews AS PosReviews
-        FROM fact_steamgames f
-        LEFT JOIN (
-            SELECT *
-            FROM bridge_genre_group
-            WHERE genreGroupKey IN (
-                SELECT genreGroupKey
-                FROM bridge_genre_group
-            )
-        ) gg ON f.genreGroupKey = gg.genreGroupKey
-        CROSS JOIN dim_genre g
-        WHERE g.genreSK = gg.genreSK
-    ) temp
-    WHERE UPPER(TRIM(temp.Genre)) = UPPER(TRIM(temp.Genre))
-    AND temp.Genre="{genre}"
-    ORDER BY temp.PosReviews DESC
-    LIMIT 50
+    query1B = '''SELECT 
+        genre.genreName AS 'Genre',
+        app.appName AS 'App Name',
+        fact.positiveReviews AS 'Positive Reviews'
+        FROM 
+            fact_steamgames fact
+        JOIN 
+            dim_app app ON fact.appSK = app.appSK
+        JOIN 
+            bridge_genre_group bgg ON fact.genreGroupKey = bgg.genreGroupKey
+        JOIN 
+            dim_genre genre ON bgg.genreSK = genre.genreSK
+        WHERE genre.genreName='{genre}'
+        ORDER BY 
+            genre.genreName, fact.positiveReviews DESC
+        LIMIT 50;
     '''.format(genre=option)
     df1b = pd.read_sql(query1B, connection)
     df1b = df1b.drop(columns=["Genre"])
