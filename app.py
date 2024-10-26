@@ -68,7 +68,7 @@ with tab1:
             FROM dim_genre
             WHERE genreSK = gg.genreSK) AS Genre,
             (SELECT appName
-            FROM Dim_App
+            FROM dim_app
             WHERE appSK = f.appSK) AS AppName,
             f.positiveReviews AS PosReviews
         FROM Fact_SteamGames f
