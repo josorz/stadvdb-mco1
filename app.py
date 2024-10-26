@@ -7,10 +7,10 @@ import altair as alt
 
 # Establish the connection
 connection = sql.connect(
-    host=DB_HOST,
-    user=DB_USER,
-    password=DB_PASSWORD,
-    database=DB_SCHEMA
+    host=st.secrets["DB_HOST"],
+    user=st.secrets["DB_USER"],
+    password=st.secrets["DB_PASSWORD"],
+    database=st.secrets["DB_SCHEMA"]
 )
 
 st.set_page_config(layout="wide")
