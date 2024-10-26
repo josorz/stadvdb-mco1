@@ -71,7 +71,7 @@ with tab1:
             FROM dim_app
             WHERE appSK = f.appSK) AS AppName,
             f.positiveReviews AS PosReviews
-        FROM Fact_SteamGames f
+        FROM fact_steamgames f
         LEFT JOIN (
             SELECT *
             FROM bridge_genre_group
