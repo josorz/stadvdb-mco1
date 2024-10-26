@@ -123,60 +123,58 @@ with tab2:
 
     st.caption("An average of " + str(results.iloc[0]['Average Playing time across all categories']) + " hours were played across all categories.")
 
+with tab4:
+    st.write("What are the most active genres between two years?")
+    options = years['releaseYear'].tolist()
+    start_year, end_year = st.select_slider(
+        "Year Range",
+        options=options,
+        value=(options[0], options[-1]),
+    )
+
+    query3C = '''SELECT 
+        genre.genreName AS 'Genre',
+        COUNT(app.appSK) AS 'Number of Apps'
+    FROM 
+        fact_steamgames fact
+    JOIN 
+        dim_app app ON fact.appSK = app.appSK
+    JOIN 
+        bridge_genre_group bgg ON fact.genreGroupKey = bgg.genreGroupKey
+    JOIN 
+        dim_genre genre ON bgg.genreSK = genre.genreSK
+    JOIN 
+        dim_year year ON fact.yearSK = year.yearSK
+    WHERE 
+        year.releaseYear BETWEEN "{start_year}" AND "{end_year}"
+    GROUP BY 
+        genre.genreName
+    ORDER BY 
+        COUNT(app.appSK) DESC
+    LIMIT 10;
+    '''.format(start_year=start_year, end_year=end_year)
+
+    df = pd.read_sql(query3C, connection)
+    df = df.sort_values(by="Number of Apps", ascending=False)
+
+    title = "Distribution of New Steam Games by Genre (" + str(start_year)
+    if start_year != end_year:
+        title += " - "+ str(end_year) + ")"
+
+    chart = alt.Chart(df).mark_bar().encode(
+        x=alt.X('Genre', sort=None),
+        y='Number of Apps'
+    ).properties(
+        title=title
+    )
+
+    # Display chart in Streamlit
+    st.altair_chart(chart, use_container_width=True)
+
+
 with tab3:
     st.subheader("What were the most popular genres across each year?", divider="gray")
     CCol1, CCol2 = st.columns(2)
-    with CCol1:
-
-        query3A = f'''SELECT 
-            genre.genreName AS 'Genre',
-            category.categoryName AS 'Category',
-            year.releaseYear AS 'Year',
-            COUNT(fact.appSK) AS 'Number of Apps Developed'
-        FROM 
-            fact_steamgames fact
-        JOIN 
-            bridge_genre_group bgg ON fact.genreGroupKey = bgg.genreGroupKey
-        JOIN 
-            dim_genre genre ON bgg.genreSK = genre.genreSK
-        JOIN 
-            bridge_category_group bcg ON fact.categoryGroupKey = bcg.categoryGroupKey
-        JOIN 
-            dim_category category ON bcg.categorySK = category.categorySK
-        JOIN 
-            dim_year year ON fact.yearSK = year.yearSK
-        GROUP BY 
-            genre.genreSK,
-            category.categorySK,
-            year.yearSK
-        ORDER BY 
-            genre.genreName,
-            category.categoryName,
-            year.releaseYear;
-        '''
-        df = pd.read_sql(query3A, connection)
-
-        # Ensure 'Year' is treated as a categorical variable
-        df['Year'] = pd.to_datetime(df['Year'], format='%Y').dt.year
-
-        # Create the selectbox for year selection
-
-        # Create the density heatmap
-        fig = px.density_heatmap(
-            df, 
-            x="Category", 
-            y="Genre", 
-            z="Number of Apps Developed", 
-            color_continuous_scale="Reds",
-            title="Review Distribution by Genre and Category, 1997-Present"
-        )
-
-        # Update figure layout
-        fig.update(layout_coloraxis_showscale=False)
-        fig.update_layout(height=600)
-
-
-        st.plotly_chart(fig, use_container_width=True)
 
     with CCol2:
         # Load the years from the database
@@ -247,53 +245,56 @@ with tab3:
         df.index += 1
         st.dataframe(df, use_container_width=True)
 
+    with CCol1:
 
-with tab4:
-    st.write("What are the most active genres between two years?")
-    options = years['releaseYear'].tolist()
-    start_year, end_year = st.select_slider(
-        "Year Range",
-        options=options,
-        value=(options[0], options[-1]),
-    )
+        query3A = f'''SELECT 
+            genre.genreName AS 'Genre',
+            category.categoryName AS 'Category',
+            year.releaseYear AS 'Year',
+            COUNT(fact.appSK) AS 'Number of Apps Developed'
+        FROM 
+            fact_steamgames fact
+        JOIN 
+            bridge_genre_group bgg ON fact.genreGroupKey = bgg.genreGroupKey
+        JOIN 
+            dim_genre genre ON bgg.genreSK = genre.genreSK
+        JOIN 
+            bridge_category_group bcg ON fact.categoryGroupKey = bcg.categoryGroupKey
+        JOIN 
+            dim_category category ON bcg.categorySK = category.categorySK
+        JOIN 
+            dim_year year ON fact.yearSK = year.yearSK
+        GROUP BY 
+            genre.genreSK,
+            category.categorySK,
+            year.yearSK
+        ORDER BY 
+            genre.genreName,
+            category.categoryName,
+            year.releaseYear;
+        '''
+        df = pd.read_sql(query3A, connection)
 
-    query3C = '''SELECT 
-        genre.genreName AS 'Genre',
-        COUNT(app.appSK) AS 'Number of Apps'
-    FROM 
-        fact_steamgames fact
-    JOIN 
-        dim_app app ON fact.appSK = app.appSK
-    JOIN 
-        bridge_genre_group bgg ON fact.genreGroupKey = bgg.genreGroupKey
-    JOIN 
-        dim_genre genre ON bgg.genreSK = genre.genreSK
-    JOIN 
-        dim_year year ON fact.yearSK = year.yearSK
-    WHERE 
-        year.releaseYear BETWEEN "{start_year}" AND "{end_year}"
-    GROUP BY 
-        genre.genreName
-    ORDER BY 
-        COUNT(app.appSK) DESC
-    LIMIT 10;
-    '''.format(start_year=start_year, end_year=end_year)
+        # Ensure 'Year' is treated as a categorical variable
+        df['Year'] = pd.to_datetime(df['Year'], format='%Y').dt.year
 
-    df = pd.read_sql(query3C, connection)
-    df = df.sort_values(by="Number of Apps", ascending=False)
+        # Create the selectbox for year selection
 
-    title = "Distribution of New Steam Games by Genre (" + str(start_year)
-    if start_year != end_year:
-        title += " - "+ str(end_year) + ")"
+        # Create the density heatmap
+        fig = px.density_heatmap(
+            df, 
+            x="Category", 
+            y="Genre", 
+            z="Number of Apps Developed", 
+            color_continuous_scale="Reds",
+            title="Review Distribution by Genre and Category, 1997-Present"
+        )
 
-    chart = alt.Chart(df).mark_bar().encode(
-        x=alt.X('Genre', sort=None),
-        y='Number of Apps'
-    ).properties(
-        title=title
-    )
+        # Update figure layout
+        fig.update(layout_coloraxis_showscale=False)
+        fig.update_layout(height=600)
 
-    # Display chart in Streamlit
-    st.altair_chart(chart, use_container_width=True)
+
+        st.plotly_chart(fig, use_container_width=True)
 
 connection.close()
