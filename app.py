@@ -65,7 +65,7 @@ with tab1:
     FROM (
         SELECT
             (SELECT genreName
-            FROM Dim_Genre
+            FROM dim_genre
             WHERE genreSK = gg.genreSK) AS Genre,
             (SELECT appName
             FROM Dim_App
@@ -74,13 +74,13 @@ with tab1:
         FROM Fact_SteamGames f
         LEFT JOIN (
             SELECT *
-            FROM Bridge_Genre_Group
+            FROM bridge_genre_group
             WHERE genreGroupKey IN (
                 SELECT genreGroupKey
-                FROM Bridge_Genre_Group
+                FROM bridge_genre_group
             )
         ) gg ON f.genreGroupKey = gg.genreGroupKey
-        CROSS JOIN Dim_Genre g
+        CROSS JOIN dim_genre g
         WHERE g.genreSK = gg.genreSK
     ) temp
     WHERE UPPER(TRIM(temp.Genre)) = UPPER(TRIM(temp.Genre))
@@ -100,11 +100,11 @@ with tab2:
         category.categoryName AS 'Category',
         AVG(fact.averagePlayTime_twoWeeks) AS 'Average Playtime (Two Weeks)'
     FROM 
-        Fact_SteamGames fact
+        fact_steamgames fact
     JOIN 
-        Bridge_Category_Group bcg ON fact.categoryGroupKey = bcg.categoryGroupKey
+        bridge_category_group bcg ON fact.categoryGroupKey = bcg.categoryGroupKey
     JOIN 
-        Dim_Category category ON bcg.categorySK = category.categorySK
+        dim_category category ON bcg.categorySK = category.categorySK
     GROUP BY 
         category.categorySK
     ORDER BY 
@@ -231,19 +231,19 @@ with tab3:
             genre.genreName AS 'Genre',
             COUNT(DISTINCT app.appSK) AS 'Number of Apps'
         FROM 
-            Fact_SteamGames fact
+            fact_steamgames fact
         JOIN 
-            Dim_App app ON fact.appSK = app.appSK
+            dim_app app ON fact.appSK = app.appSK
         JOIN 
-            Bridge_Category_Group bcg ON fact.categoryGroupKey = bcg.categoryGroupKey
+            bridge_category_group bcg ON fact.categoryGroupKey = bcg.categoryGroupKey
         JOIN 
-            Dim_Category category ON bcg.categorySK = category.categorySK
+            dim_category category ON bcg.categorySK = category.categorySK
         JOIN 
-            Bridge_Genre_Group bgg ON fact.genreGroupKey = bgg.genreGroupKey
+            bridge_genre_group bgg ON fact.genreGroupKey = bgg.genreGroupKey
         JOIN 
-            Dim_Genre genre ON bgg.genreSK = genre.genreSK
+            dim_genre genre ON bgg.genreSK = genre.genreSK
         JOIN 
-            Dim_Year year ON fact.yearSK = year.yearSK
+            dim_year year ON fact.yearSK = year.yearSK
         WHERE 
             year.releaseYear = '{Year}'
             AND category.categoryName = '{Category}'
@@ -272,15 +272,15 @@ with tab4:
         genre.genreName AS 'Genre',
         COUNT(app.appSK) AS 'Number of Apps'
     FROM 
-        Fact_SteamGames fact
+        fact_steamgames fact
     JOIN 
-        Dim_App app ON fact.appSK = app.appSK
+        dim_app app ON fact.appSK = app.appSK
     JOIN 
-        Bridge_Genre_Group bgg ON fact.genreGroupKey = bgg.genreGroupKey
+        bridge_genre_group bgg ON fact.genreGroupKey = bgg.genreGroupKey
     JOIN 
-        Dim_Genre genre ON bgg.genreSK = genre.genreSK
+        dim_genre genre ON bgg.genreSK = genre.genreSK
     JOIN 
-        Dim_Year year ON fact.yearSK = year.yearSK
+        dim_year year ON fact.yearSK = year.yearSK
     WHERE 
         year.releaseYear BETWEEN "{start_year}" AND "{end_year}"
     GROUP BY 
