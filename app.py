@@ -8,7 +8,7 @@ import altair as alt
 # Establish the connection
 connection = sql.connect(
     host=st.secrets["DB_HOST"],
-    port=st.secrets["PORT"]
+    port=st.secrets["PORT"],
     user=st.secrets["DB_USER"],
     password=st.secrets["DB_PASSWORD"],
     database=st.secrets["DB_SCHEMA"]
