@@ -7,10 +7,11 @@ import altair as alt
 
 # Establish the connection
 connection = sql.connect(
-    host="localhost",
-    user="root",
-    password="password",
-    database="steam_dw"
+    host=st.secrets["DB_HOST"],
+    port=st.secrets["PORT"],
+    user=st.secrets["DB_USER"],
+    password=st.secrets["DB_PASSWORD"],
+    database=st.secrets["DB_SCHEMA"]
 )
 
 st.set_page_config(layout="wide")
@@ -85,7 +86,7 @@ with tab1:
     WHERE UPPER(TRIM(temp.Genre)) = UPPER(TRIM(temp.Genre))
     AND temp.Genre="{genre}"
     ORDER BY temp.PosReviews DESC
-    LIMIT 50
+    LIMIT 500
     '''.format(genre=option)
     df1b = pd.read_sql(query1B, connection)
     df1b = df1b.drop(columns=["Genre"])
