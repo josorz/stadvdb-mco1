@@ -124,6 +124,10 @@ with tab2:
     st.caption("An average of " + str(results.iloc[0]['Average Playing time across all categories']) + " hours were played across all categories.")
 
 with tab4:
+    # Load the years from the database
+    years = pd.read_sql("SELECT releaseYear FROM dim_year ORDER BY releaseYear", connection)
+
+
     st.write("What are the most active genres between two years?")
     options = years['releaseYear'].tolist()
     start_year, end_year = st.select_slider(
@@ -177,8 +181,6 @@ with tab3:
     CCol1, CCol2 = st.columns(2)
 
     with CCol2:
-        # Load the years from the database
-        years = pd.read_sql("SELECT releaseYear FROM dim_year ORDER BY releaseYear", connection)
 
         # Convert years to a list
         years_list = years['releaseYear'].tolist()
