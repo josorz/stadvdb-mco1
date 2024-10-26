@@ -144,17 +144,17 @@ with tab3:
             year.releaseYear AS 'Year',
             COUNT(fact.appSK) AS 'Number of Apps Developed'
         FROM 
-            Fact_SteamGames fact
+            fact_steamgames fact
         JOIN 
-            Bridge_Genre_Group bgg ON fact.genreGroupKey = bgg.genreGroupKey
+            bridge_genre_group bgg ON fact.genreGroupKey = bgg.genreGroupKey
         JOIN 
-            Dim_Genre genre ON bgg.genreSK = genre.genreSK
+            dim_genre genre ON bgg.genreSK = genre.genreSK
         JOIN 
-            Bridge_Category_Group bcg ON fact.categoryGroupKey = bcg.categoryGroupKey
+            bridge_category_group bcg ON fact.categoryGroupKey = bcg.categoryGroupKey
         JOIN 
-            Dim_Category category ON bcg.categorySK = category.categorySK
+            dim_category category ON bcg.categorySK = category.categorySK
         JOIN 
-            Dim_Year year ON fact.yearSK = year.yearSK
+            dim_year year ON fact.yearSK = year.yearSK
         GROUP BY 
             genre.genreName,
             category.categoryName,
