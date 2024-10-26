@@ -8,7 +8,7 @@ import altair as alt
 # Establish the connection
 connection = sql.connect(
     host=st.secrets["DB_HOST"],
-    port=st.secrets["PORT"],
+    port=st.secrets["PORT"]
     user=st.secrets["DB_USER"],
     password=st.secrets["DB_PASSWORD"],
     database=st.secrets["DB_SCHEMA"]
@@ -146,14 +146,13 @@ with tab3:
         JOIN 
             dim_year year ON fact.yearSK = year.yearSK
         GROUP BY 
-            genre.genreName,
-            category.categoryName,
-            year.releaseYear
+            genre.genreSK,
+            category.categorySK,
+            year.yearSK
         ORDER BY 
             genre.genreName,
             category.categoryName,
             year.releaseYear;
-        ;
         '''
         df = pd.read_sql(query3A, connection)
 
